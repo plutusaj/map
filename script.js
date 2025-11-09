@@ -85,6 +85,23 @@ let activeMetricKey = "pigsPerKm2";
 let scaleMode = "log";
 let fillOpacity = 0.8;
 
+const isMobileDevice = (() => {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || navigator.vendor || "";
+  return /android|iphone|ipad|ipod|iemobile|opera mini|mobile/i.test(ua) ||
+    (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+})();
+
+if (typeof document !== "undefined") {
+  if (document.body) {
+    if (isMobileDevice) document.body.classList.add("is-mobile");
+  } else {
+    document.addEventListener("DOMContentLoaded", () => {
+      if (isMobileDevice) document.body.classList.add("is-mobile");
+    });
+  }
+}
+
 const namePropertyCandidates = [
   "NOMCOMAR", "Comarca", "COMARCA", "comarca", "NAME_2", "NAME", "NOM",
   "NOMCOMARCA", "nom_comar", "NOM_COMAR", "Nom_Comar", "nomcomar"
