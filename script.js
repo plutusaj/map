@@ -313,6 +313,10 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
+const farmMarkersPane = "farm-markers";
+map.createPane(farmMarkersPane);
+map.getPane(farmMarkersPane).style.zIndex = 650;
+
 ["info-panel", "layer-selector", "legend"].forEach(id => {
   const node = document.getElementById(id);
   if (node) {
@@ -322,8 +326,262 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 });
 
 const geojsonUrl = "comarques_4326.geojson";
+const farmsCsvUrl = "RER_llistat_explotacions_catalanes.csv";
 
 let comarcaLayer = null;
+let farmsLayer = null;
+let farmsVisible = true;
+let farmDataPromise = null;
+const farmMarkerStyle = {
+  radius: 3.2,
+  weight: 0.6,
+  opacity: 0.9,
+  color: "#7a0000",
+  fillColor: "#ff3b3b",
+  fillOpacity: 0.85,
+  pane: farmMarkersPane
+};
+
+function normalizeHeaderValue(str) {
+  return str
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+function parseCoordinate(raw) {
+  if (raw == null) return null;
+  let str = String(raw).trim();
+  if (!str) return null;
+
+  let hemisphere = 1;
+  const hemi = str.match(/([NSEO])$/i);
+  if (hemi) {
+    const letter = hemi[1].toUpperCase();
+    if (letter === "S" || letter === "O" || letter === "W") {
+      hemisphere = -1;
+    }
+    str = str.slice(0, -1).trim();
+  }
+
+  let normalized = str
+    .replace(/,/g, ".")
+    .replace(/[º°]/g, " ")
+    .replace(/['’]/g, " ")
+    .replace(/["”]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!normalized) return null;
+
+  if (/^-?\d+(\.\d+)?$/.test(normalized)) {
+    const value = Number(normalized) * hemisphere;
+    return Number.isFinite(value) ? value : null;
+  }
+
+  const parts = normalized.split(" ").map(part => Number(part)).filter(num => !Number.isNaN(num));
+  if (!parts.length) return null;
+
+  const deg = parts[0];
+  const minutes = parts[1] || 0;
+  const seconds = parts[2] || 0;
+  const baseSign = deg < 0 ? -1 : 1;
+  const absolute = Math.abs(deg) + Math.abs(minutes) / 60 + Math.abs(seconds) / 3600;
+  const decimal = absolute * baseSign * hemisphere;
+  return Number.isFinite(decimal) ? decimal : null;
+}
+
+function parseCsvText(text) {
+  if (!text) return [];
+  let cleanText = text;
+  if (cleanText.charCodeAt(0) === 0xfeff) {
+    cleanText = cleanText.slice(1);
+  }
+  const rows = [];
+  let current = [];
+  let value = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < cleanText.length; i++) {
+    const char = cleanText[i];
+    if (char === "\"") {
+      if (inQuotes && cleanText[i + 1] === "\"") {
+        value += "\"";
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && cleanText[i + 1] === "\n") {
+        i++;
+      }
+      current.push(value);
+      rows.push(current);
+      current = [];
+      value = "";
+      continue;
+    }
+    if (char === "," && !inQuotes) {
+      current.push(value);
+      value = "";
+      continue;
+    }
+    value += char;
+  }
+
+  if (value.length > 0 || current.length > 0) {
+    current.push(value);
+    rows.push(current);
+  }
+
+  return rows;
+}
+
+function escapeHtml(str) {
+  return str
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildFarmPopupHtml(point) {
+  const lines = [];
+  if (point.name) {
+    lines.push(`<strong>${escapeHtml(point.name)}</strong>`);
+  }
+  const metaParts = [];
+  if (point.municipi) metaParts.push(escapeHtml(point.municipi));
+  if (point.comarca) metaParts.push(escapeHtml(point.comarca));
+  if (point.code) metaParts.push(`REGA: ${escapeHtml(point.code)}`);
+  if (metaParts.length) {
+    lines.push(metaParts.join("<br>"));
+  }
+
+  const rowsHtml = (point.rowEntries || []).map(entry => {
+    const label = entry?.label ? escapeHtml(entry.label) : "—";
+    const value = entry?.value ? escapeHtml(entry.value) : "—";
+    return `<tr><td>${label}</td><td>${value}</td></tr>`;
+  }).join("");
+
+  return `
+    <div class="farm-popup">
+      ${lines.length ? `<div class="farm-popup-summary">${lines.join("<br>")}</div>` : ""}
+      <div class="farm-popup-table-wrapper">
+        <table class="farm-popup-table">${rowsHtml}</table>
+      </div>
+    </div>
+  `;
+}
+
+function buildFarmMarkers(points) {
+  if (!farmsLayer) {
+    farmsLayer = L.layerGroup();
+  } else {
+    farmsLayer.clearLayers();
+  }
+
+  points.forEach(point => {
+    const marker = L.circleMarker([point.lat, point.lng], farmMarkerStyle);
+    marker.bindPopup(buildFarmPopupHtml(point), {
+      maxWidth: 360,
+      maxHeight: 320,
+      className: "farm-popup-leaflet"
+    });
+    marker.addTo(farmsLayer);
+  });
+
+  updateFarmsLayerVisibility();
+}
+
+function updateFarmsLayerVisibility() {
+  if (!farmsLayer) return;
+  const isOnMap = map.hasLayer(farmsLayer);
+  if (farmsVisible && !isOnMap) {
+    farmsLayer.addTo(map);
+  } else if (!farmsVisible && isOnMap) {
+    map.removeLayer(farmsLayer);
+  }
+}
+
+function loadFarmLocations() {
+  if (farmsLayer) {
+    updateFarmsLayerVisibility();
+    return;
+  }
+
+  if (!farmDataPromise) {
+    farmDataPromise = fetch(farmsCsvUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.text();
+      })
+      .then(text => {
+        const rows = parseCsvText(text);
+        if (!rows.length) {
+          throw new Error("CSV vacío");
+        }
+        const headers = rows.shift().map(header => header || "");
+        const latIndex = headers.findIndex(h => normalizeHeaderValue(h) === "LATITUD EXPLOTACIO");
+        const lonIndex = headers.findIndex(h => normalizeHeaderValue(h) === "LONGITUD EXPLOTACIO");
+        if (latIndex === -1 || lonIndex === -1) {
+          throw new Error("No se han encontrado las columnas de latitud/longitud");
+        }
+        const nameIndex = headers.findIndex(h => normalizeHeaderValue(h) === "NOM EXPLOTACIO");
+        const municipiIndex = headers.findIndex(h => normalizeHeaderValue(h) === "MUNICIPI EXPLOTACIO");
+        const comarcaIndex = headers.findIndex(h => normalizeHeaderValue(h) === "COMARCA EXPLOTACIO");
+        const regaIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CODI REGA");
+
+        const unique = new Map();
+        for (const row of rows) {
+          const lat = parseCoordinate(row[latIndex]);
+          const lng = parseCoordinate(row[lonIndex]);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+          const name = nameIndex !== -1 ? row[nameIndex]?.trim() : "";
+          const municipi = municipiIndex !== -1 ? row[municipiIndex]?.trim() : "";
+          const comarca = comarcaIndex !== -1 ? row[comarcaIndex]?.trim() : "";
+          const code = regaIndex !== -1 ? row[regaIndex]?.trim() : "";
+          const rowEntries = headers.map((header, idx) => {
+            const label = (header && header.trim()) ? header.trim() : `Columna ${idx + 1}`;
+            const rawValue = row[idx];
+            const value = typeof rawValue === "string" ? rawValue.trim() : (rawValue ?? "");
+            return { label, value: value || "" };
+          });
+          const key = `${code || ""}::${lat.toFixed(6)}::${lng.toFixed(6)}`;
+          if (unique.has(key)) continue;
+          unique.set(key, { lat, lng, name, municipi, comarca, code, rowEntries });
+        }
+
+        return Array.from(unique.values());
+      })
+      .catch(err => {
+        console.error("No se han podido cargar las explotaciones del CSV:", err);
+        farmDataPromise = null;
+        throw err;
+      });
+  }
+
+  farmDataPromise
+    .then(points => {
+      buildFarmMarkers(points);
+    })
+    .catch(() => {
+      if (farmsToggleInput) {
+        farmsToggleInput.checked = false;
+        farmsVisible = false;
+      }
+      alert("No se han podido cargar las explotaciones del CSV.");
+    });
+}
 
 function baseFeatureStyle(feature) {
   const canonical = getComarcaNameFromProps(feature.properties) || "";
@@ -473,5 +731,19 @@ if (opacitySlider) {
     setFillOpacityFromSlider(event.target.value);
   });
 }
+
+const farmsToggleInput = document.getElementById("farms-toggle");
+if (farmsToggleInput) {
+  farmsVisible = !!farmsToggleInput.checked;
+  farmsToggleInput.addEventListener("change", () => {
+    farmsVisible = !!farmsToggleInput.checked;
+    if (farmsVisible) {
+      loadFarmLocations();
+    }
+    updateFarmsLayerVisibility();
+  });
+}
+
+loadFarmLocations();
 
 updateLegend();
