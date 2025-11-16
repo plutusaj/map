@@ -218,6 +218,107 @@
       text-align: right;
     }
 
+    .species-filter-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(0,0,0,0.02);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .species-filter-toggle:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    .species-filter-toggle .chevron {
+      width: 10px;
+      height: 10px;
+      border-right: 1.5px solid #444;
+      border-bottom: 1.5px solid #444;
+      transform: rotate(45deg);
+      transition: transform 0.15s ease;
+    }
+
+    .species-filter-toggle[aria-expanded="true"] .chevron {
+      transform: rotate(-135deg);
+    }
+
+    .species-filter-panel {
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(255,255,255,0.9);
+      padding: 8px;
+    }
+
+    .species-filter-panel[hidden] {
+      display: none;
+    }
+
+    .species-filter {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-top: 4px;
+      padding-right: 4px;
+    }
+
+    .species-filter-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .species-filter-item input {
+      accent-color: #5d2c1b;
+    }
+
+    .species-filter-empty {
+      font-size: 10px;
+      color: #777;
+      padding: 4px 0;
+    }
+
+    .species-filter-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .species-filter-controls button {
+      border: none;
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .species-filter-controls button:hover:not(:disabled) {
+      background: #e0e0e0;
+    }
+
+    .species-filter-controls button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     body.is-mobile #info-panel {
       top: 8px;
       right: 8px;
@@ -305,6 +406,30 @@
       width: 110px;
       height: 8px;
     }
+
+    body.is-mobile .species-filter-toggle {
+      margin-top: 6px;
+      padding: 5px 8px;
+      font-size: 11px;
+    }
+
+    body.is-mobile .species-filter-panel {
+      padding: 6px;
+    }
+
+    body.is-mobile .species-filter {
+      max-height: 110px;
+    }
+
+    body.is-mobile .species-filter-controls {
+      font-size: 10px;
+      gap: 4px;
+    }
+
+    body.is-mobile .species-filter-controls button {
+      font-size: 9px;
+      padding: 2px 6px;
+    }
   </style>
 </head>
 <body>
@@ -349,6 +474,74 @@
     </div>
     <div class="section-subtitle">Explotaciones</div>
     <label><input type="checkbox" id="farms-toggle" checked /> Explotaciones RER</label>
+    <button
+      type="button"
+      id="species-filter-toggle"
+      class="species-filter-toggle"
+      aria-expanded="false"
+      aria-controls="species-filter-panel"
+    >
+      Filtrar por especie
+      <span class="chevron" aria-hidden="true"></span>
+    </button>
+    <div id="species-filter-panel" class="species-filter-panel" hidden>
+      <div class="species-filter-controls">
+        <span>Selecciona especies</span>
+        <button type="button" id="species-filter-clear" disabled>Limpiar</button>
+      </div>
+      <div id="species-filter" class="species-filter"></div>
+    </div>
+    <button
+      type="button"
+      id="system-filter-toggle"
+      class="species-filter-toggle"
+      aria-expanded="false"
+      aria-controls="system-filter-panel"
+    >
+      Sistema productiu
+      <span class="chevron" aria-hidden="true"></span>
+    </button>
+    <div id="system-filter-panel" class="species-filter-panel" hidden>
+      <div class="species-filter-controls">
+        <span>Selecciona sistemes</span>
+        <button type="button" id="system-filter-clear" disabled>Limpiar</button>
+      </div>
+      <div id="system-filter" class="species-filter"></div>
+    </div>
+    <button
+      type="button"
+      id="sustainability-filter-toggle"
+      class="species-filter-toggle"
+      aria-expanded="false"
+      aria-controls="sustainability-filter-panel"
+    >
+      Criteri de sostenibilitat
+      <span class="chevron" aria-hidden="true"></span>
+    </button>
+    <div id="sustainability-filter-panel" class="species-filter-panel" hidden>
+      <div class="species-filter-controls">
+        <span>Selecciona criteris</span>
+        <button type="button" id="sustainability-filter-clear" disabled>Limpiar</button>
+      </div>
+      <div id="sustainability-filter" class="species-filter"></div>
+    </div>
+    <button
+      type="button"
+      id="farmtype-filter-toggle"
+      class="species-filter-toggle"
+      aria-expanded="false"
+      aria-controls="farmtype-filter-panel"
+    >
+      Tipus d'explotació
+      <span class="chevron" aria-hidden="true"></span>
+    </button>
+    <div id="farmtype-filter-panel" class="species-filter-panel" hidden>
+      <div class="species-filter-controls">
+        <span>Selecciona tipus</span>
+        <button type="button" id="farmtype-filter-clear" disabled>Limpiar</button>
+      </div>
+      <div id="farmtype-filter" class="species-filter"></div>
+    </div>
   </div>
 
   <div class="attribution-note">

@@ -327,11 +327,32 @@ map.getPane(farmMarkersPane).style.zIndex = 650;
 
 const geojsonUrl = "comarques_4326.geojson";
 const farmsCsvUrl = "RER_llistat_explotacions_catalanes.csv";
+const speciesFilterContainer = document.getElementById("species-filter");
+const speciesFilterPanel = document.getElementById("species-filter-panel");
+const speciesFilterToggleBtn = document.getElementById("species-filter-toggle");
+const speciesFilterClearBtn = document.getElementById("species-filter-clear");
+const systemFilterContainer = document.getElementById("system-filter");
+const systemFilterPanel = document.getElementById("system-filter-panel");
+const systemFilterToggleBtn = document.getElementById("system-filter-toggle");
+const systemFilterClearBtn = document.getElementById("system-filter-clear");
+const sustainabilityFilterContainer = document.getElementById("sustainability-filter");
+const sustainabilityFilterPanel = document.getElementById("sustainability-filter-panel");
+const sustainabilityFilterToggleBtn = document.getElementById("sustainability-filter-toggle");
+const sustainabilityFilterClearBtn = document.getElementById("sustainability-filter-clear");
+const farmTypeFilterContainer = document.getElementById("farmtype-filter");
+const farmTypeFilterPanel = document.getElementById("farmtype-filter-panel");
+const farmTypeFilterToggleBtn = document.getElementById("farmtype-filter-toggle");
+const farmTypeFilterClearBtn = document.getElementById("farmtype-filter-clear");
 
 let comarcaLayer = null;
 let farmsLayer = null;
 let farmsVisible = true;
 let farmDataPromise = null;
+let allFarmPoints = [];
+const selectedSpecies = new Set();
+const selectedSystems = new Set();
+const selectedCriteria = new Set();
+const selectedFarmTypes = new Set();
 const farmMarkerStyle = {
   radius: 3.2,
   weight: 0.6,
@@ -452,6 +473,162 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+function getFilteredFarmPoints() {
+  if (!allFarmPoints.length) return [];
+  if (!selectedSpecies.size && !selectedSystems.size && !selectedCriteria.size && !selectedFarmTypes.size) {
+    return allFarmPoints;
+  }
+  return allFarmPoints.filter(point => {
+    if (selectedSpecies.size && (!point.species || !selectedSpecies.has(point.species))) {
+      return false;
+    }
+    if (selectedSystems.size && (!point.productionSystem || !selectedSystems.has(point.productionSystem))) {
+      return false;
+    }
+    if (selectedCriteria.size && (!point.sustainabilityCriterion || !selectedCriteria.has(point.sustainabilityCriterion))) {
+      return false;
+    }
+    if (selectedFarmTypes.size && (!point.farmType || !selectedFarmTypes.has(point.farmType))) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function applyFarmFilters() {
+  buildFarmMarkers(getFilteredFarmPoints());
+}
+
+function populateFilterOptions(points, {
+  container,
+  clearBtn,
+  selectedSet,
+  accessor,
+  idPrefix,
+  emptyMessage
+}) {
+  if (!container) return;
+  const valueSet = new Set();
+  points.forEach(point => {
+    const value = accessor(point);
+    if (value) valueSet.add(value);
+  });
+  const sortedValues = Array.from(valueSet).sort((a, b) =>
+    a.localeCompare(b, "ca", { sensitivity: "accent" })
+  );
+  container.innerHTML = "";
+  if (!sortedValues.length) {
+    const empty = document.createElement("div");
+    empty.className = "species-filter-empty";
+    empty.textContent = emptyMessage;
+    container.appendChild(empty);
+    if (clearBtn) clearBtn.disabled = true;
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  sortedValues.forEach((name, index) => {
+    const optionId = `${idPrefix}-${index}`;
+    const label = document.createElement("label");
+    label.className = "species-filter-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = optionId;
+    checkbox.value = name;
+    checkbox.checked = selectedSet.has(name);
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        selectedSet.add(name);
+      } else {
+        selectedSet.delete(name);
+      }
+      applyFarmFilters();
+    });
+
+    const text = document.createElement("span");
+    text.textContent = name;
+
+    label.appendChild(checkbox);
+    label.appendChild(text);
+    fragment.appendChild(label);
+  });
+
+  container.appendChild(fragment);
+  if (clearBtn) {
+    clearBtn.disabled = false;
+  }
+}
+
+function populateSpeciesFilter(points) {
+  populateFilterOptions(points, {
+    container: speciesFilterContainer,
+    clearBtn: speciesFilterClearBtn,
+    selectedSet: selectedSpecies,
+    accessor: point => point.species,
+    idPrefix: "species-filter",
+    emptyMessage: "El CSV no contiene valores de especie."
+  });
+}
+
+function populateSystemFilter(points) {
+  populateFilterOptions(points, {
+    container: systemFilterContainer,
+    clearBtn: systemFilterClearBtn,
+    selectedSet: selectedSystems,
+    accessor: point => point.productionSystem,
+    idPrefix: "system-filter",
+    emptyMessage: "El CSV no contiene valores de sistema productiu."
+  });
+}
+
+function populateSustainabilityFilter(points) {
+  populateFilterOptions(points, {
+    container: sustainabilityFilterContainer,
+    clearBtn: sustainabilityFilterClearBtn,
+    selectedSet: selectedCriteria,
+    accessor: point => point.sustainabilityCriterion,
+    idPrefix: "sustainability-filter",
+    emptyMessage: "El CSV no contiene valores de criteri de sostenibilitat."
+  });
+}
+
+function populateFarmTypeFilter(points) {
+  populateFilterOptions(points, {
+    container: farmTypeFilterContainer,
+    clearBtn: farmTypeFilterClearBtn,
+    selectedSet: selectedFarmTypes,
+    accessor: point => point.farmType,
+    idPrefix: "farmtype-filter",
+    emptyMessage: "El CSV no contiene valores de tipus d'explotació."
+  });
+}
+
+function setupFilterToggle(button, panel) {
+  if (!button || !panel) return;
+  button.addEventListener("click", () => {
+    const isExpanded = button.getAttribute("aria-expanded") === "true";
+    const nextState = !isExpanded;
+    button.setAttribute("aria-expanded", String(nextState));
+    panel.hidden = !nextState;
+  });
+}
+
+function setupFilterClearButton(button, container, selectedSet) {
+  if (!button) return;
+  button.addEventListener("click", () => {
+    selectedSet.clear();
+    if (container) {
+      container
+        .querySelectorAll('input[type="checkbox"]')
+        .forEach(input => {
+          input.checked = false;
+        });
+    }
+    applyFarmFilters();
+  });
+}
+
 function buildFarmPopupHtml(point) {
   const lines = [];
   if (point.name) {
@@ -486,6 +663,11 @@ function buildFarmMarkers(points) {
     farmsLayer = L.layerGroup();
   } else {
     farmsLayer.clearLayers();
+  }
+
+  if (!Array.isArray(points) || !points.length) {
+    updateFarmsLayerVisibility();
+    return;
   }
 
   points.forEach(point => {
@@ -540,6 +722,10 @@ function loadFarmLocations() {
         const municipiIndex = headers.findIndex(h => normalizeHeaderValue(h) === "MUNICIPI EXPLOTACIO");
         const comarcaIndex = headers.findIndex(h => normalizeHeaderValue(h) === "COMARCA EXPLOTACIO");
         const regaIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CODI REGA");
+        const especieIndex = headers.findIndex(h => normalizeHeaderValue(h) === "ESPECIE");
+        const systemIndex = headers.findIndex(h => normalizeHeaderValue(h) === "SISTEMA PRODUCTIU");
+        const sustainabilityIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CRITERI DE SOSTENIBILITAT");
+        const farmTypeIndex = headers.findIndex(h => normalizeHeaderValue(h) === "TIPUS EXPLOTACIO");
 
         const unique = new Map();
         for (const row of rows) {
@@ -550,6 +736,10 @@ function loadFarmLocations() {
           const municipi = municipiIndex !== -1 ? row[municipiIndex]?.trim() : "";
           const comarca = comarcaIndex !== -1 ? row[comarcaIndex]?.trim() : "";
           const code = regaIndex !== -1 ? row[regaIndex]?.trim() : "";
+          const species = especieIndex !== -1 ? row[especieIndex]?.trim() : "";
+          const productionSystem = systemIndex !== -1 ? row[systemIndex]?.trim() : "";
+          const sustainabilityCriterion = sustainabilityIndex !== -1 ? row[sustainabilityIndex]?.trim() : "";
+          const farmType = farmTypeIndex !== -1 ? row[farmTypeIndex]?.trim() : "";
           const rowEntries = headers.map((header, idx) => {
             const label = (header && header.trim()) ? header.trim() : `Columna ${idx + 1}`;
             const rawValue = row[idx];
@@ -558,7 +748,19 @@ function loadFarmLocations() {
           });
           const key = `${code || ""}::${lat.toFixed(6)}::${lng.toFixed(6)}`;
           if (unique.has(key)) continue;
-          unique.set(key, { lat, lng, name, municipi, comarca, code, rowEntries });
+          unique.set(key, {
+            lat,
+            lng,
+            name,
+            municipi,
+            comarca,
+            code,
+            species,
+            productionSystem,
+            sustainabilityCriterion,
+            farmType,
+            rowEntries
+          });
         }
 
         return Array.from(unique.values());
@@ -572,7 +774,12 @@ function loadFarmLocations() {
 
   farmDataPromise
     .then(points => {
-      buildFarmMarkers(points);
+      allFarmPoints = points;
+      populateSpeciesFilter(points);
+      populateSystemFilter(points);
+      populateSustainabilityFilter(points);
+      populateFarmTypeFilter(points);
+      applyFarmFilters();
     })
     .catch(() => {
       if (farmsToggleInput) {
@@ -743,6 +950,20 @@ if (farmsToggleInput) {
     updateFarmsLayerVisibility();
   });
 }
+
+setupFilterToggle(speciesFilterToggleBtn, speciesFilterPanel);
+setupFilterToggle(systemFilterToggleBtn, systemFilterPanel);
+setupFilterToggle(sustainabilityFilterToggleBtn, sustainabilityFilterPanel);
+setupFilterToggle(farmTypeFilterToggleBtn, farmTypeFilterPanel);
+
+setupFilterClearButton(speciesFilterClearBtn, speciesFilterContainer, selectedSpecies);
+setupFilterClearButton(systemFilterClearBtn, systemFilterContainer, selectedSystems);
+setupFilterClearButton(
+  sustainabilityFilterClearBtn,
+  sustainabilityFilterContainer,
+  selectedCriteria
+);
+setupFilterClearButton(farmTypeFilterClearBtn, farmTypeFilterContainer, selectedFarmTypes);
 
 loadFarmLocations();
 
