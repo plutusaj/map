@@ -1,48 +1,48 @@
 // === Datos originales ===
 const comarcaData = {
-  "Alt Camp":          { area: 538,   population: 46388,  pigs: 62134 },
-  "Alt Empordà":       { area: 1358,  population: 148732, pigs: 389431 },
-  "Alt Penedès":       { area: 593,   population: 114189, pigs: 4781 },
-  "Alt Urgell":        { area: 1447,  population: 21128,  pigs: 40486 },
-  "Alta Ribagorça":    { area: 427,   population: 4040,   pigs: 2570 },
-  "Anoia":             { area: 866,   population: 128432, pigs: 136862 },
-  "Bages":             { area: 1092,  population: 185352, pigs: 307319 },
-  "Baix Camp":         { area: 697,   population: 204458, pigs: 64750 },
-  "Baix Ebre":         { area: 1003,  population: 82399,  pigs: 71842 },
-  "Baix Empordà":      { area: 702,   population: 143443, pigs: 119407 },
-  "Baix Llobregat":    { area: 486,   population: 848827, pigs: 1007 },
-  "Baix Penedès":      { area: 296,   population: 118350, pigs: 27868 },
-  "Barcelonès":        { area: 146,   population: 2354301,pigs: 0 },
-  "Berguedà":          { area: 1185,  population: 41058,  pigs: 253666 },
-  "Cerdanya":          { area: 547,   population: 20115,  pigs: 906 },
-  "Conca de Barberà":  { area: 650,   population: 20569,  pigs: 63803 },
-  "Garraf":            { area: 185,   population: 161907, pigs: 738 },
-  "Garrigues":         { area: 798,   population: 19075,  pigs: 393347 },
-  "Garrotxa":          { area: 735,   population: 62449,  pigs: 104383 },
-  "Gironès":           { area: 576,   population: 205573, pigs: 80283 },
-  "Lluçanès":          { area: 227,   population: 5718,   pigs: null },
-  "Maresme":           { area: 399,   population: 472572, pigs: 6931 },
-  "Moianès":           { area: 338,   population: 14758,  pigs: 83318 },
-  "Montsià":           { area: 735,   population: 71460,  pigs: 178602 },
-  "Noguera":           { area: 1784,  population: 39727,  pigs: 1135009 },
-  "Osona":             { area: 1019,  population: 164006, pigs: 1027492 },
-  "Pallars Jussà":     { area: 1343,  population: 13383,  pigs: 151237 },
-  "Pallars Sobirà":    { area: 1378,  population: 7332,   pigs: 9584 },
-  "Pla d'Urgell":      { area: 305,   population: 38111,  pigs: 433767 },
-  "Pla de l'Estany":   { area: 263,   population: 33564,  pigs: 202324 },
-  "Priorat":           { area: 499,   population: 9420,   pigs: 7939 },
-  "Ribera d'Ebre":     { area: 827,   population: 22132,  pigs: 47251 },
-  "Ripollès":          { area: 957,   population: 25826,  pigs: 19343 },
-  "Segarra":           { area: 563,   population: 22667,  pigs: 399045 },
-  "Segrià":            { area: 1397,  population: 217853, pigs: 1347873 },
-  "Selva":             { area: 995,   population: 185264, pigs: 81658 },
-  "Solsonès":          { area: 1161,  population: 15323,  pigs: 231343 },
-  "Tarragonès":        { area: 319,   population: 275122, pigs: 8303 },
-  "Terra Alta":        { area: 743,   population: 11446,  pigs: 65664 },
-  "Urgell":            { area: 580,   population: 38531,  pigs: 475287 },
-  "Vall d'Aran":       { area: 634,   population: 10545,  pigs: 45172 },
-  "Vallès Occidental": { area: 583,   population: 960033, pigs: 20068 },
-  "Vallès Oriental":   { area: 735,   population: 426653, pigs: 90003 }
+  "Alt Camp": { area: 538, population: 46388, pigs: 62134 },
+  "Alt Empordà": { area: 1358, population: 148732, pigs: 389431 },
+  "Alt Penedès": { area: 593, population: 114189, pigs: 4781 },
+  "Alt Urgell": { area: 1447, population: 21128, pigs: 40486 },
+  "Alta Ribagorça": { area: 427, population: 4040, pigs: 2570 },
+  "Anoia": { area: 866, population: 128432, pigs: 136862 },
+  "Bages": { area: 1092, population: 185352, pigs: 307319 },
+  "Baix Camp": { area: 697, population: 204458, pigs: 64750 },
+  "Baix Ebre": { area: 1003, population: 82399, pigs: 71842 },
+  "Baix Empordà": { area: 702, population: 143443, pigs: 119407 },
+  "Baix Llobregat": { area: 486, population: 848827, pigs: 1007 },
+  "Baix Penedès": { area: 296, population: 118350, pigs: 27868 },
+  "Barcelonès": { area: 146, population: 2354301, pigs: 0 },
+  "Berguedà": { area: 1185, population: 41058, pigs: 253666 },
+  "Cerdanya": { area: 547, population: 20115, pigs: 906 },
+  "Conca de Barberà": { area: 650, population: 20569, pigs: 63803 },
+  "Garraf": { area: 185, population: 161907, pigs: 738 },
+  "Garrigues": { area: 798, population: 19075, pigs: 393347 },
+  "Garrotxa": { area: 735, population: 62449, pigs: 104383 },
+  "Gironès": { area: 576, population: 205573, pigs: 80283 },
+  "Lluçanès": { area: 227, population: 5718, pigs: null },
+  "Maresme": { area: 399, population: 472572, pigs: 6931 },
+  "Moianès": { area: 338, population: 14758, pigs: 83318 },
+  "Montsià": { area: 735, population: 71460, pigs: 178602 },
+  "Noguera": { area: 1784, population: 39727, pigs: 1135009 },
+  "Osona": { area: 1019, population: 164006, pigs: 1027492 },
+  "Pallars Jussà": { area: 1343, population: 13383, pigs: 151237 },
+  "Pallars Sobirà": { area: 1378, population: 7332, pigs: 9584 },
+  "Pla d'Urgell": { area: 305, population: 38111, pigs: 433767 },
+  "Pla de l'Estany": { area: 263, population: 33564, pigs: 202324 },
+  "Priorat": { area: 499, population: 9420, pigs: 7939 },
+  "Ribera d'Ebre": { area: 827, population: 22132, pigs: 47251 },
+  "Ripollès": { area: 957, population: 25826, pigs: 19343 },
+  "Segarra": { area: 563, population: 22667, pigs: 399045 },
+  "Segrià": { area: 1397, population: 217853, pigs: 1347873 },
+  "Selva": { area: 995, population: 185264, pigs: 81658 },
+  "Solsonès": { area: 1161, population: 15323, pigs: 231343 },
+  "Tarragonès": { area: 319, population: 275122, pigs: 8303 },
+  "Terra Alta": { area: 743, population: 11446, pigs: 65664 },
+  "Urgell": { area: 580, population: 38531, pigs: 475287 },
+  "Vall d'Aran": { area: 634, population: 10545, pigs: 45172 },
+  "Vallès Occidental": { area: 583, population: 960033, pigs: 20068 },
+  "Vallès Oriental": { area: 735, population: 426653, pigs: 90003 }
 };
 
 // Alias de nombres alternativos -> nombre canónico
@@ -75,10 +75,10 @@ for (const [alias, canonical] of Object.entries(comarcaNameAliases)) {
 }
 
 const metricConfigs = {
-  population:   { label: "Habitantes", shortUnit: "hab.", decimals: 0, accessor: d => d.population },
-  pigs:         { label: "Cerdos", shortUnit: "cerdos", decimals: 0, accessor: d => d.pigs },
-  pigsPerKm2:   { label: "Cerdos por km²", shortUnit: "cerdos/km²", decimals: 1, accessor: d => d.pigsPerKm2 },
-  pigsPerCapita:{ label: "Cerdos por habitante", shortUnit: "cerdos/hab.", decimals: 2, accessor: d => d.pigsPerCapita }
+  population: { label: "Habitantes", shortUnit: "hab.", decimals: 0, accessor: d => d.population },
+  pigs: { label: "Cerdos", shortUnit: "cerdos", decimals: 0, accessor: d => d.pigs },
+  pigsPerKm2: { label: "Cerdos por km²", shortUnit: "cerdos/km²", decimals: 1, accessor: d => d.pigsPerKm2 },
+  pigsPerCapita: { label: "Cerdos por habitante", shortUnit: "cerdos/hab.", decimals: 2, accessor: d => d.pigsPerCapita }
 };
 
 let activeMetricKey = "pigsPerKm2";
@@ -263,7 +263,7 @@ function getColor(value, metricKey = activeMetricKey) {
   const t = getScaleRatio(value, metricKey);
   if (t <= 0) return "#e5f5e0";
   const start = { r: 0xe5, g: 0xf5, b: 0xe0 }; // verde claro
-  const end   = { r: 0x5d, g: 0x2c, b: 0x1b }; // marrón oscuro
+  const end = { r: 0x5d, g: 0x2c, b: 0x1b }; // marrón oscuro
   const r = Math.round(start.r + (end.r - start.r) * t);
   const g = Math.round(start.g + (end.g - start.g) * t);
   const b = Math.round(start.b + (end.b - start.b) * t);
@@ -278,28 +278,43 @@ function formatLegendValue(value, decimals = 0) {
 // Panel
 function updateInfoPanel(name, data) {
   const panel = document.getElementById("info-panel");
-  const tds = panel.getElementsByTagName("td");
 
-  if (!name || !data) {
-    tds[1].textContent  = "—";
-    tds[3].textContent  = "—";
-    tds[5].textContent  = "—";
-    tds[7].textContent  = "—";
-    tds[9].textContent  = "—";
-    tds[11].textContent = "—";
+  // Si no hay comarca seleccionada/hover
+  if (!name) {
+    panel.innerHTML = `
+      <h2>Comarcas de Cataluña</h2>
+      <p class="subtitle">Pasa el ratón sobre una comarca.</p>
+      <table>
+        <tr><td class="label">Comarca</td><td class="value">—</td></tr>
+        <tr><td class="label">Explotaciones</td><td class="value">—</td></tr>
+        <tr><td class="label">Total Animales</td><td class="value">—</td></tr>
+      </table>
+    `;
     return;
   }
 
-  const fmt = (v, decimals=0) =>
-    (v == null || isNaN(v)) ? "N/D" :
-    v.toLocaleString("es-ES", { maximumFractionDigits: decimals });
+  // Calcular datos dinámicos basados en los filtros actuales
+  const filteredPoints = getFilteredFarmPoints();
+  const normName = normalizeName(name);
 
-  tds[1].textContent  = name;
-  tds[3].textContent  = fmt(data.area);
-  tds[5].textContent  = fmt(data.population);
-  tds[7].textContent  = data.pigs == null ? "N/D" : fmt(data.pigs);
-  tds[9].textContent  = data.pigsPerKm2 == null ? "N/D" : fmt(data.pigsPerKm2, 1);
-  tds[11].textContent = data.pigsPerCapita == null ? "N/D" : fmt(data.pigsPerCapita, 2);
+  const comarcaFarms = filteredPoints.filter(p => {
+    return normalizeName(p.comarca) === normName;
+  });
+
+  const farmCount = comarcaFarms.length;
+  const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
+
+  const fmt = (v) => (v == null || isNaN(v)) ? "0" : v.toLocaleString("es-ES");
+
+  panel.innerHTML = `
+    <h2>${escapeHtml(name)}</h2>
+    <p class="subtitle">Datos filtrados en mapa</p>
+    <table>
+      <tr><td class="label">Explotaciones</td><td class="value">${fmt(farmCount)}</td></tr>
+      <tr><td class="label">Total Animales</td><td class="value">${fmt(totalAnimals)}</td></tr>
+    </table>
+    <div class="hint">Datos basados en Explotaciones RER visibles.</div>
+  `;
 }
 
 // Mapa Leaflet
@@ -726,6 +741,7 @@ function loadFarmLocations() {
         const systemIndex = headers.findIndex(h => normalizeHeaderValue(h) === "SISTEMA PRODUCTIU");
         const sustainabilityIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CRITERI DE SOSTENIBILITAT");
         const farmTypeIndex = headers.findIndex(h => normalizeHeaderValue(h) === "TIPUS EXPLOTACIO");
+        const totalAnimalsIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CAP Nº TOTAL ANIMALS");
 
         const unique = new Map();
         for (const row of rows) {
@@ -759,6 +775,7 @@ function loadFarmLocations() {
             productionSystem,
             sustainabilityCriterion,
             farmType,
+            totalAnimals: parseCoordinate(row[totalAnimalsIndex]), // Reutilizamos parseCoordinate para números
             rowEntries
           });
         }
@@ -811,62 +828,62 @@ fetch(geojsonUrl)
   .then(geojson => {
     const layer = L.geoJSON(geojson, {
       style: baseFeatureStyle,
-          onEachFeature: (feature, layer) => {
-            const rawName =
-              feature.properties.NOMCOMAR || feature.properties.Comarca ||
-              feature.properties.COMARCA || feature.properties.comarca ||
-              feature.properties.nom_comar || feature.properties.NAME_2 ||
-              feature.properties.NAME || feature.properties.NOM || "Desconocida";
+      onEachFeature: (feature, layer) => {
+        const rawName =
+          feature.properties.NOMCOMAR || feature.properties.Comarca ||
+          feature.properties.COMARCA || feature.properties.comarca ||
+          feature.properties.nom_comar || feature.properties.NAME_2 ||
+          feature.properties.NAME || feature.properties.NOM || "Desconocida";
 
-            const canonical = getComarcaNameFromProps(feature.properties);
-            const name = canonical || rawName;
-            const data = canonical ? comarcaData[canonical] : null;
-            layer._comarcaMeta = { name, data };
+        const canonical = getComarcaNameFromProps(feature.properties);
+        const name = canonical || rawName;
+        const data = canonical ? comarcaData[canonical] : null;
+        layer._comarcaMeta = { name, data };
 
-            if (!canonical) {
-              console.warn("Sin datos para comarca del GeoJSON:", rawName);
-            }
+        if (!canonical) {
+          console.warn("Sin datos para comarca del GeoJSON:", rawName);
+        }
 
-            layer.on("mouseover", () => {
-              focusLayer(layer);
-              if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                layer.bringToFront();
-              }
-              updateInfoPanel(name, data || null);
-            });
-
-            layer.on("mouseout", () => {
-              blurLayer(layer);
-              if (pinnedLayer && pinnedLayer._comarcaMeta) {
-                const meta = pinnedLayer._comarcaMeta;
-                updateInfoPanel(meta.name, meta.data || null);
-              } else if (!hoveredLayer) {
-                updateInfoPanel(null, null);
-              }
-            });
-
-            layer.on("click", event => {
-              L.DomEvent.stopPropagation(event);
-              pinLayer(layer);
-            });
+        layer.on("mouseover", () => {
+          focusLayer(layer);
+          if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
           }
-        }).addTo(map);
+          updateInfoPanel(name, data || null);
+        });
 
-        comarcaLayer = layer;
+        layer.on("mouseout", () => {
+          blurLayer(layer);
+          if (pinnedLayer && pinnedLayer._comarcaMeta) {
+            const meta = pinnedLayer._comarcaMeta;
+            updateInfoPanel(meta.name, meta.data || null);
+          } else if (!hoveredLayer) {
+            updateInfoPanel(null, null);
+          }
+        });
 
-        map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-      })
-      .catch(err => {
-        console.error("Error al cargar el GeoJSON de comarcas:", err);
-        alert("No se ha podido cargar el mapa de comarcas. Revisa la URL.");
-      });
+        layer.on("click", event => {
+          L.DomEvent.stopPropagation(event);
+          pinLayer(layer);
+        });
+      }
+    }).addTo(map);
 
-    map.on("click", () => {
-      clearPinnedLayer();
-    });
+    comarcaLayer = layer;
 
-    const legendTitleEl = document.querySelector(".legend-title");
-    const legendLabels = document.querySelectorAll(".legend-labels span");
+    map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+  })
+  .catch(err => {
+    console.error("Error al cargar el GeoJSON de comarcas:", err);
+    alert("No se ha podido cargar el mapa de comarcas. Revisa la URL.");
+  });
+
+map.on("click", () => {
+  clearPinnedLayer();
+});
+
+const legendTitleEl = document.querySelector(".legend-title");
+const legendLabels = document.querySelectorAll(".legend-labels span");
 
 function updateLegend() {
   const config = metricConfigs[activeMetricKey];
