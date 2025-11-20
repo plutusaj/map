@@ -321,6 +321,24 @@ function updateInfoPanel(name, data) {
     <table>
       <tr><td class="label">Explotaciones</td><td class="value">${fmt(farmCount)}</td></tr>
       <tr><td class="label">Total Animales</td><td class="value">${fmt(totalAnimals)}</td></tr>
+      ${(() => {
+      const speciesCounts = {};
+      comarcaFarms.forEach(p => {
+        const s = p.species || "Desconocido";
+        speciesCounts[s] = (speciesCounts[s] || 0) + (p.totalAnimals || 0);
+      });
+
+      return Object.entries(speciesCounts)
+        .filter(([_, count]) => count > 0)
+        .map(([species, count]) => {
+          const percentage = totalAnimals > 0 ? (count / totalAnimals) * 100 : 0;
+          return { species, percentage };
+        })
+        .filter(item => item.percentage > 0)
+        .sort((a, b) => b.percentage - a.percentage)
+        .map(item => `<tr><td class="label">${escapeHtml(item.species)}</td><td class="value">${item.percentage.toFixed(2)}%</td></tr>`)
+        .join("");
+    })()}
     </table>
     <div class="hint">Datos basados en Explotaciones RER visibles.</div>
   `;
