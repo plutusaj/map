@@ -50,7 +50,18 @@ const comarcaNameAliases = {
   "Val d'Aran": "Vall d'Aran",
   "Val d Aran": "Vall d'Aran",
   "Valle de Aran": "Vall d'Aran",
-  "Valle d'Aran": "Vall d'Aran"
+  "Valle d'Aran": "Vall d'Aran",
+  "La Selva": "Selva",
+  "La Noguera": "Noguera",
+  "La Garrotxa": "Garrotxa",
+  "La Segarra": "Segarra",
+  "El Priorat": "Priorat",
+  "El Ripollès": "Ripollès",
+  "El Baix Penedès": "Baix Penedès",
+  "El Baix Empordà": "Baix Empordà",
+  "El Baix Ebre": "Baix Ebre",
+  "El Baix Camp": "Baix Camp",
+  "El Baix Llobregat": "Baix Llobregat"
 };
 
 // Normalización robusta de nombres
@@ -75,13 +86,10 @@ for (const [alias, canonical] of Object.entries(comarcaNameAliases)) {
 }
 
 const metricConfigs = {
-  population: { label: "Habitantes", shortUnit: "hab.", decimals: 0, accessor: d => d.population },
-  pigs: { label: "Cerdos", shortUnit: "cerdos", decimals: 0, accessor: d => d.pigs },
-  pigsPerKm2: { label: "Cerdos por km²", shortUnit: "cerdos/km²", decimals: 1, accessor: d => d.pigsPerKm2 },
-  pigsPerCapita: { label: "Cerdos por habitante", shortUnit: "cerdos/hab.", decimals: 2, accessor: d => d.pigsPerCapita }
+  totalAnimals: { label: "Total Animales", shortUnit: "animales", decimals: 0, accessor: d => d.totalAnimals }
 };
 
-let activeMetricKey = "pigsPerKm2";
+let activeMetricKey = "totalAnimals";
 let scaleMode = "log";
 let fillOpacity = 0.8;
 let pinnedLayer = null;
@@ -203,16 +211,7 @@ function getComarcaNameFromProps(props = {}) {
   return null;
 }
 
-// Calcular densidades y ratios
-for (const [name, d] of Object.entries(comarcaData)) {
-  if (d.pigs != null && d.area > 0) {
-    d.pigsPerKm2 = d.pigs / d.area;
-    d.pigsPerCapita = d.pigs / d.population;
-  } else {
-    d.pigsPerKm2 = null;
-    d.pigsPerCapita = null;
-  }
-}
+// Calcular densidades y ratios - REMOVED obsolete metrics calculation
 
 // Calcula rangos por métrica
 for (const key of Object.keys(metricConfigs)) {
@@ -279,9 +278,18 @@ function formatLegendValue(value, decimals = 0) {
 function updateInfoPanel(name, data) {
   const panel = document.getElementById("info-panel");
 
+  // Calcular total global basado en filtros actuales
+  const filteredPoints = getFilteredFarmPoints();
+  const globalTotalAnimals = filteredPoints.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
+  const fmt = (v) => (v == null || isNaN(v)) ? "0" : v.toLocaleString("es-ES");
+
   // Si no hay comarca seleccionada/hover
   if (!name) {
     panel.innerHTML = `
+      <div class="global-stats">
+        <span class="label">Total Cataluña Animales:</span>
+        <span class="value">${fmt(globalTotalAnimals)}</span>
+      </div>
       <h2>Comarcas de Cataluña</h2>
       <p class="subtitle">Pasa el ratón sobre una comarca.</p>
       <table>
@@ -303,9 +311,11 @@ function updateInfoPanel(name, data) {
   const farmCount = comarcaFarms.length;
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
 
-  const fmt = (v) => (v == null || isNaN(v)) ? "0" : v.toLocaleString("es-ES");
-
   panel.innerHTML = `
+    <div class="global-stats">
+      <span class="label">Total Cataluña Animales:</span>
+      <span class="value">${fmt(globalTotalAnimals)}</span>
+    </div>
     <h2>${escapeHtml(name)}</h2>
     <p class="subtitle">Datos filtrados en mapa</p>
     <table>
@@ -512,8 +522,57 @@ function getFilteredFarmPoints() {
   return allFarmPoints.filter(isFarmVisible);
 }
 
+function recalculateComarcaMetrics() {
+  // 1. Reset metrics for all comarcas
+  for (const key of Object.keys(comarcaData)) {
+    comarcaData[key].totalAnimals = 0;
+  }
+
+  // 2. Sum totalAnimals for visible farms
+  for (const [comarcaName, farms] of farmsByComarca.entries()) {
+    // farmsByComarca keys are normalized, but we need to map back to comarcaData keys if possible
+    // However, comarcaData keys are canonical.
+    // We can use the comarcaNameMap to find the canonical name.
+    const canonical = comarcaNameMap[comarcaName];
+    if (canonical && comarcaData[canonical]) {
+      let sum = 0;
+      for (const farm of farms) {
+        if (isFarmVisible(farm)) {
+          sum += (farm.totalAnimals || 0);
+        }
+      }
+      comarcaData[canonical].totalAnimals = sum;
+    }
+  }
+
+  // 3. Recalculate min/max for metricConfigs
+  for (const key of Object.keys(metricConfigs)) {
+    let min = Infinity;
+    let max = 0;
+    let minPositive = Infinity;
+    const accessor = metricConfigs[key].accessor;
+
+    for (const data of Object.values(comarcaData)) {
+      const value = accessor(data);
+      if (value != null && !isNaN(value)) {
+        if (value < min) min = value;
+        if (value > max) max = value;
+        if (value > 0 && value < minPositive) minPositive = value;
+      }
+    }
+
+    const config = metricConfigs[key];
+    config.min = min === Infinity ? 0 : min;
+    config.max = max > 0 ? max : 1;
+    config.minPositive = minPositive === Infinity ? config.max : minPositive;
+  }
+}
+
 function applyFarmFilters() {
   buildFarmMarkers(getFilteredFarmPoints());
+  recalculateComarcaMetrics();
+  updateLegend();
+  refreshLayerStyles();
 }
 
 function populateFilterOptions(points, {
@@ -675,6 +734,28 @@ function buildFarmPopupHtml(point) {
   `;
 }
 
+const speciesColorMap = {
+  "PORCÍ": "#e377c2",      // Pink
+  "BOVÍ": "#8c564b",       // Brown
+  "AVIRAM": "#ff7f0e",     // Orange
+  "OVÍ": "#2ca02c",        // Green
+  "CABRUM": "#bcbd22",     // Olive
+  "EQUÍ": "#9467bd",       // Purple
+  "CUNÍCOLA": "#17becf",   // Cyan
+  "APÍCOLA": "#e7ba52",    // Gold
+  "ALTRES": "#7f7f7f"      // Gray
+};
+
+function getSpeciesColor(species) {
+  if (!species) return "#7a0000"; // Default dark red
+  const upper = species.toUpperCase();
+  // Check for exact match or partial match if needed
+  for (const [key, color] of Object.entries(speciesColorMap)) {
+    if (upper.includes(key)) return color;
+  }
+  return "#7a0000"; // Fallback
+}
+
 function buildFarmMarkers(points) {
   if (!farmsLayer) {
     farmsLayer = L.layerGroup();
@@ -688,7 +769,15 @@ function buildFarmMarkers(points) {
   }
 
   points.forEach(point => {
-    const marker = L.circleMarker([point.lat, point.lng], farmMarkerStyle);
+    const color = getSpeciesColor(point.species);
+    const style = {
+      ...farmMarkerStyle,
+      color: "#333", // Darker border for contrast
+      fillColor: color,
+      fillOpacity: 0.8
+    };
+
+    const marker = L.circleMarker([point.lat, point.lng], style);
     marker.bindPopup(buildFarmPopupHtml(point), {
       maxWidth: 360,
       maxHeight: 320,
@@ -772,7 +861,11 @@ function loadFarmLocations() {
           const key = `${code || ""}::${lat.toFixed(6)}::${lng.toFixed(6)}`;
           if (unique.has(key)) continue;
 
-          const normalizedComarca = normalizeName(comarca);
+          let normalizedComarca = normalizeName(comarca);
+          const canonical = comarcaNameMap[normalizedComarca];
+          if (canonical) {
+            normalizedComarca = normalizeName(canonical);
+          }
 
           unique.set(key, {
             lat,
@@ -789,7 +882,7 @@ function loadFarmLocations() {
             totalAnimals: capacityIndices.reduce((sum, idx) => {
               const val = parseCoordinate(row[idx]);
               return sum + (val || 0);
-            }, 0),
+            }, 0) + (parseCoordinate(row[totalAnimalsIndex]) || 0),
             rowEntries
           });
         }
@@ -822,6 +915,7 @@ function loadFarmLocations() {
       populateSystemFilter(points);
       populateSustainabilityFilter(points);
       populateFarmTypeFilter(points);
+      recalculateComarcaMetrics();
       applyFarmFilters();
     })
     .catch(() => {
