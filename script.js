@@ -294,12 +294,11 @@ function updateInfoPanel(name, data) {
   }
 
   // Calcular datos dinámicos basados en los filtros actuales
-  const filteredPoints = getFilteredFarmPoints();
+  // Optimización: Usar índice pre-calculado en lugar de iterar todo el array
   const normName = normalizeName(name);
+  const potentialFarms = farmsByComarca.get(normName) || [];
 
-  const comarcaFarms = filteredPoints.filter(p => {
-    return normalizeName(p.comarca) === normName;
-  });
+  const comarcaFarms = potentialFarms.filter(isFarmVisible);
 
   const farmCount = comarcaFarms.length;
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
@@ -364,6 +363,7 @@ let farmsLayer = null;
 let farmsVisible = true;
 let farmDataPromise = null;
 let allFarmPoints = [];
+let farmsByComarca = new Map();
 const selectedSpecies = new Set();
 const selectedSystems = new Set();
 const selectedCriteria = new Set();
@@ -488,26 +488,28 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+function isFarmVisible(point) {
+  if (selectedSpecies.size && (!point.species || !selectedSpecies.has(point.species))) {
+    return false;
+  }
+  if (selectedSystems.size && (!point.productionSystem || !selectedSystems.has(point.productionSystem))) {
+    return false;
+  }
+  if (selectedCriteria.size && (!point.sustainabilityCriterion || !selectedCriteria.has(point.sustainabilityCriterion))) {
+    return false;
+  }
+  if (selectedFarmTypes.size && (!point.farmType || !selectedFarmTypes.has(point.farmType))) {
+    return false;
+  }
+  return true;
+}
+
 function getFilteredFarmPoints() {
   if (!allFarmPoints.length) return [];
   if (!selectedSpecies.size && !selectedSystems.size && !selectedCriteria.size && !selectedFarmTypes.size) {
     return allFarmPoints;
   }
-  return allFarmPoints.filter(point => {
-    if (selectedSpecies.size && (!point.species || !selectedSpecies.has(point.species))) {
-      return false;
-    }
-    if (selectedSystems.size && (!point.productionSystem || !selectedSystems.has(point.productionSystem))) {
-      return false;
-    }
-    if (selectedCriteria.size && (!point.sustainabilityCriterion || !selectedCriteria.has(point.sustainabilityCriterion))) {
-      return false;
-    }
-    if (selectedFarmTypes.size && (!point.farmType || !selectedFarmTypes.has(point.farmType))) {
-      return false;
-    }
-    return true;
-  });
+  return allFarmPoints.filter(isFarmVisible);
 }
 
 function applyFarmFilters() {
@@ -743,6 +745,11 @@ function loadFarmLocations() {
         const farmTypeIndex = headers.findIndex(h => normalizeHeaderValue(h) === "TIPUS EXPLOTACIO");
         const totalAnimalsIndex = headers.findIndex(h => normalizeHeaderValue(h) === "CAP Nº TOTAL ANIMALS");
 
+        // Identify all capacity columns excluding "CAPACITAT PRODUCTIVA" (which is text)
+        const capacityIndices = headers.map((h, i) => ({ name: normalizeHeaderValue(h), index: i }))
+          .filter(({ name }) => name.startsWith("CAPACITAT") && name !== "CAPACITAT PRODUCTIVA")
+          .map(({ index }) => index);
+
         const unique = new Map();
         for (const row of rows) {
           const lat = parseCoordinate(row[latIndex]);
@@ -764,23 +771,42 @@ function loadFarmLocations() {
           });
           const key = `${code || ""}::${lat.toFixed(6)}::${lng.toFixed(6)}`;
           if (unique.has(key)) continue;
+
+          const normalizedComarca = normalizeName(comarca);
+
           unique.set(key, {
             lat,
             lng,
             name,
             municipi,
             comarca,
+            normalizedComarca, // Guardamos la versión normalizada
             code,
             species,
             productionSystem,
             sustainabilityCriterion,
             farmType,
-            totalAnimals: parseCoordinate(row[totalAnimalsIndex]), // Reutilizamos parseCoordinate para números
+            totalAnimals: capacityIndices.reduce((sum, idx) => {
+              const val = parseCoordinate(row[idx]);
+              return sum + (val || 0);
+            }, 0),
             rowEntries
           });
         }
 
-        return Array.from(unique.values());
+        const points = Array.from(unique.values());
+
+        // Construir índice por comarca
+        farmsByComarca.clear();
+        for (const p of points) {
+          const c = p.normalizedComarca;
+          if (!farmsByComarca.has(c)) {
+            farmsByComarca.set(c, []);
+          }
+          farmsByComarca.get(c).push(p);
+        }
+
+        return points;
       })
       .catch(err => {
         console.error("No se han podido cargar las explotaciones del CSV:", err);
