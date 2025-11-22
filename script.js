@@ -276,8 +276,8 @@ function formatLegendValue(value, decimals = 0) {
   return value.toLocaleString("es-ES", { maximumFractionDigits: decimals });
 }
 
-function buildSpeciesBreakdownRows(farms, totalValue, metricKey = "totalAnimals") {
-  if (!farms.length || !totalValue) return "";
+function getSpeciesBreakdownData(farms, totalValue, metricKey = "totalAnimals") {
+  if (!farms.length || !totalValue) return [];
   const speciesCounts = {};
   farms.forEach(point => {
     const species = point.species || "Desconocido";
@@ -289,12 +289,49 @@ function buildSpeciesBreakdownRows(farms, totalValue, metricKey = "totalAnimals"
     .filter(([, count]) => count > 0)
     .map(([species, count]) => {
       const percentage = totalValue > 0 ? (count / totalValue) * 100 : 0;
-      return { species, percentage };
+      return { species, count, percentage };
     })
     .filter(item => item.percentage > 0)
-    .sort((a, b) => b.percentage - a.percentage)
-    .map(item => `<tr><td class="label">${escapeHtml(item.species)}</td><td class="value">${item.percentage.toFixed(2)}%</td></tr>`)
-    .join("");
+    .sort((a, b) => b.percentage - a.percentage);
+}
+
+function createPieChartSVG(data, size = 100) {
+  const radius = size / 2;
+  const center = size / 2;
+  let currentAngle = 0;
+  let paths = [];
+
+  // Handle single item case (full circle)
+  if (data.length === 1) {
+    const color = getSpeciesColor(data[0].species);
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" />
+    </svg>`;
+  }
+
+  data.forEach(item => {
+    const sliceAngle = (item.percentage / 100) * 360;
+    const x1 = center + radius * Math.cos(Math.PI * (currentAngle - 90) / 180);
+    const y1 = center + radius * Math.sin(Math.PI * (currentAngle - 90) / 180);
+    const x2 = center + radius * Math.cos(Math.PI * (currentAngle + sliceAngle - 90) / 180);
+    const y2 = center + radius * Math.sin(Math.PI * (currentAngle + sliceAngle - 90) / 180);
+
+    // Use 1 if angle > 180
+    const largeArcFlag = sliceAngle > 180 ? 1 : 0;
+
+    const pathData = [
+      `M ${center} ${center}`,
+      `L ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+      `Z`
+    ].join(" ");
+
+    const color = getSpeciesColor(item.species);
+    paths.push(`<path d="${pathData}" fill="${color}" stroke="white" stroke-width="1" />`);
+    currentAngle += sliceAngle;
+  });
+
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform: rotate(0deg); display: block;">${paths.join("")}</svg>`;
 }
 
 // Panel
@@ -337,7 +374,30 @@ function updateInfoPanel(name, data) {
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
 
   const totalForMetric = activeMetricKey === "farmCount" ? farmCount : totalAnimals;
-  const speciesRows = buildSpeciesBreakdownRows(comarcaFarms, totalForMetric, activeMetricKey);
+
+  // Generate Pie Chart Data
+  const breakdownData = getSpeciesBreakdownData(comarcaFarms, totalForMetric, activeMetricKey);
+  let speciesChartHtml = "";
+
+  if (breakdownData.length > 0) {
+    const pieSvg = createPieChartSVG(breakdownData, 80);
+    const legendHtml = breakdownData.map(item => {
+      const color = getSpeciesColor(item.species);
+      return `
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 10px; line-height: 1.2;">
+          <span style="display:inline-block; width: 8px; height: 8px; background-color: ${color}; border-radius: 50%; flex-shrink: 0;"></span>
+          <span>${escapeHtml(item.species)} <strong>${item.percentage.toFixed(1)}%</strong></span>
+        </div>
+      `;
+    }).join("");
+
+    speciesChartHtml = `
+      <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; align-items: flex-start; gap: 12px;">
+        <div style="flex-shrink: 0;">${pieSvg}</div>
+        <div style="flex-grow: 1;">${legendHtml}</div>
+      </div>
+    `;
+  }
 
   panel.innerHTML = `
     <h2>Total en Cataluña</h2>
@@ -350,8 +410,8 @@ function updateInfoPanel(name, data) {
     <table>
       <tr><td class="label">Explotaciones</td><td class="value">${fmt(farmCount)}</td></tr>
       <tr><td class="label">Total Animales</td><td class="value">${fmt(totalAnimals)}</td></tr>
-      ${speciesRows}
     </table>
+    ${speciesChartHtml}
     <div class="hint">Datos basados en Explotaciones RER visibles.</div>
   `;
 }
@@ -752,12 +812,29 @@ function buildFarmPopupHtml(point) {
 const speciesColorMap = {
   "PORCÍ": "#e377c2",      // Pink
   "BOVÍ": "#8c564b",       // Brown
-  "AVIRAM": "#ff7f0e",     // Orange
   "OVÍ": "#2ca02c",        // Green
   "CABRUM": "#bcbd22",     // Olive
-  "EQUÍ": "#9467bd",       // Purple
-  "CUNÍCOLA": "#17becf",   // Cyan
+  "ÈQUID": "#9467bd",      // Purple
+  "CONILL": "#17becf",     // Cyan
+  "GALLINES": "#ff7f0e",   // Orange
+  "GALLS DINDI": "#d62728",// Red
+  "ÀNECS": "#1f77b4",      // Blue
+  "OQUES": "#aec7e8",      // Light Blue
+  "PERDIUS": "#c5b0d5",    // Light Purple
+  "FAISANS": "#ffbb78",    // Light Orange
+  "COLOMS": "#c49c94",     // Light Brown
+  "CARGOLS": "#9edae5",    // Light Cyan
+  "ALTRES AUS": "#f7b6d2", // Light Pink
+  "RATITES": "#dbdb8d",    // Pale Olive
+  "ANGUILA": "#393b79",    // Dark Blue
+  "MUSCLO": "#5254a3",     // Medium Blue
+  "OSTRA": "#6b6ecf",      // Light-Medium Blue
+  "TRUITA": "#9c9ede",     // Lavender
+  "CUC": "#637939",        // Dark Green
+  "GRILL": "#8ca252",      // Medium Green
+  "MOSCA": "#b5cf6b",      // Light Green
   "APÍCOLA": "#e7ba52",    // Gold
+  "AVIRAM": "#ff7f0e",     // Fallback Orange
   "ALTRES": "#7f7f7f"      // Gray
 };
 
