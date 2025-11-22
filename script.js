@@ -114,7 +114,7 @@ function updateMetricRanges() {
 }
 
 let activeMetricKey = "totalAnimals";
-let scaleMode = "log";
+let scaleMode = "linear";
 let fillOpacity = 0.8;
 let pinnedLayer = null;
 let hoveredLayer = null;
@@ -444,19 +444,23 @@ const farmsCsvUrl = "RER_llistat_explotacions_catalanes.csv";
 const speciesFilterContainer = document.getElementById("species-filter");
 const speciesFilterPanel = document.getElementById("species-filter-panel");
 const speciesFilterToggleBtn = document.getElementById("species-filter-toggle");
-const speciesFilterClearBtn = document.getElementById("species-filter-clear");
+const speciesFilterSelectAllBtn = document.getElementById("species-filter-select-all");
+const speciesFilterDeselectAllBtn = document.getElementById("species-filter-deselect-all");
 const systemFilterContainer = document.getElementById("system-filter");
 const systemFilterPanel = document.getElementById("system-filter-panel");
 const systemFilterToggleBtn = document.getElementById("system-filter-toggle");
-const systemFilterClearBtn = document.getElementById("system-filter-clear");
+const systemFilterSelectAllBtn = document.getElementById("system-filter-select-all");
+const systemFilterDeselectAllBtn = document.getElementById("system-filter-deselect-all");
 const sustainabilityFilterContainer = document.getElementById("sustainability-filter");
 const sustainabilityFilterPanel = document.getElementById("sustainability-filter-panel");
 const sustainabilityFilterToggleBtn = document.getElementById("sustainability-filter-toggle");
-const sustainabilityFilterClearBtn = document.getElementById("sustainability-filter-clear");
+const sustainabilityFilterSelectAllBtn = document.getElementById("sustainability-filter-select-all");
+const sustainabilityFilterDeselectAllBtn = document.getElementById("sustainability-filter-deselect-all");
 const farmTypeFilterContainer = document.getElementById("farmtype-filter");
 const farmTypeFilterPanel = document.getElementById("farmtype-filter-panel");
 const farmTypeFilterToggleBtn = document.getElementById("farmtype-filter-toggle");
-const farmTypeFilterClearBtn = document.getElementById("farmtype-filter-clear");
+const farmTypeFilterSelectAllBtn = document.getElementById("farmtype-filter-select-all");
+const farmTypeFilterDeselectAllBtn = document.getElementById("farmtype-filter-deselect-all");
 const farmsLoadingEl = document.getElementById("farms-loading");
 
 let comarcaLayer = null;
@@ -587,26 +591,23 @@ function escapeHtml(str) {
 }
 
 function isFarmVisible(point) {
-  if (selectedSpecies.size && (!point.species || !selectedSpecies.has(point.species))) {
-    return false;
-  }
-  if (selectedSystems.size && (!point.productionSystem || !selectedSystems.has(point.productionSystem))) {
-    return false;
-  }
-  if (selectedCriteria.size && (!point.sustainabilityCriterion || !selectedCriteria.has(point.sustainabilityCriterion))) {
-    return false;
-  }
-  if (selectedFarmTypes.size && (!point.farmType || !selectedFarmTypes.has(point.farmType))) {
-    return false;
-  }
+  const species = point.species || "(Desconocido)";
+  if (!selectedSpecies.has(species)) return false;
+
+  const system = point.productionSystem || "(Desconocido)";
+  if (!selectedSystems.has(system)) return false;
+
+  const criterion = point.sustainabilityCriterion || "(Desconocido)";
+  if (!selectedCriteria.has(criterion)) return false;
+
+  const fType = point.farmType || "(Desconocido)";
+  if (!selectedFarmTypes.has(fType)) return false;
+
   return true;
 }
 
 function getFilteredFarmPoints() {
   if (!allFarmPoints.length) return [];
-  if (!selectedSpecies.size && !selectedSystems.size && !selectedCriteria.size && !selectedFarmTypes.size) {
-    return allFarmPoints;
-  }
   return allFarmPoints.filter(isFarmVisible);
 }
 
@@ -652,7 +653,8 @@ function applyFarmFilters() {
 
 function populateFilterOptions(points, {
   container,
-  clearBtn,
+  selectAllBtn,
+  deselectAllBtn,
   selectedSet,
   accessor,
   idPrefix,
@@ -661,9 +663,15 @@ function populateFilterOptions(points, {
   if (!container) return;
   const valueSet = new Set();
   points.forEach(point => {
-    const value = accessor(point);
-    if (value) valueSet.add(value);
+    const raw = accessor(point);
+    const value = raw || "(Desconocido)";
+    valueSet.add(value);
   });
+
+  // Default: Select all
+  selectedSet.clear();
+  valueSet.forEach(v => selectedSet.add(v));
+
   const sortedValues = Array.from(valueSet).sort((a, b) =>
     a.localeCompare(b, "ca", { sensitivity: "accent" })
   );
@@ -673,7 +681,8 @@ function populateFilterOptions(points, {
     empty.className = "species-filter-empty";
     empty.textContent = emptyMessage;
     container.appendChild(empty);
-    if (clearBtn) clearBtn.disabled = true;
+    if (selectAllBtn) selectAllBtn.disabled = true;
+    if (deselectAllBtn) deselectAllBtn.disabled = true;
     return;
   }
 
@@ -687,7 +696,7 @@ function populateFilterOptions(points, {
     checkbox.type = "checkbox";
     checkbox.id = optionId;
     checkbox.value = name;
-    checkbox.checked = selectedSet.has(name);
+    checkbox.checked = true;
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
         selectedSet.add(name);
@@ -706,15 +715,15 @@ function populateFilterOptions(points, {
   });
 
   container.appendChild(fragment);
-  if (clearBtn) {
-    clearBtn.disabled = false;
-  }
+  if (selectAllBtn) selectAllBtn.disabled = false;
+  if (deselectAllBtn) deselectAllBtn.disabled = false;
 }
 
 function populateSpeciesFilter(points) {
   populateFilterOptions(points, {
     container: speciesFilterContainer,
-    clearBtn: speciesFilterClearBtn,
+    selectAllBtn: speciesFilterSelectAllBtn,
+    deselectAllBtn: speciesFilterDeselectAllBtn,
     selectedSet: selectedSpecies,
     accessor: point => point.species,
     idPrefix: "species-filter",
@@ -725,7 +734,8 @@ function populateSpeciesFilter(points) {
 function populateSystemFilter(points) {
   populateFilterOptions(points, {
     container: systemFilterContainer,
-    clearBtn: systemFilterClearBtn,
+    selectAllBtn: systemFilterSelectAllBtn,
+    deselectAllBtn: systemFilterDeselectAllBtn,
     selectedSet: selectedSystems,
     accessor: point => point.productionSystem,
     idPrefix: "system-filter",
@@ -736,7 +746,8 @@ function populateSystemFilter(points) {
 function populateSustainabilityFilter(points) {
   populateFilterOptions(points, {
     container: sustainabilityFilterContainer,
-    clearBtn: sustainabilityFilterClearBtn,
+    selectAllBtn: sustainabilityFilterSelectAllBtn,
+    deselectAllBtn: sustainabilityFilterDeselectAllBtn,
     selectedSet: selectedCriteria,
     accessor: point => point.sustainabilityCriterion,
     idPrefix: "sustainability-filter",
@@ -747,7 +758,8 @@ function populateSustainabilityFilter(points) {
 function populateFarmTypeFilter(points) {
   populateFilterOptions(points, {
     container: farmTypeFilterContainer,
-    clearBtn: farmTypeFilterClearBtn,
+    selectAllBtn: farmTypeFilterSelectAllBtn,
+    deselectAllBtn: farmTypeFilterDeselectAllBtn,
     selectedSet: selectedFarmTypes,
     accessor: point => point.farmType,
     idPrefix: "farmtype-filter",
@@ -765,19 +777,29 @@ function setupFilterToggle(button, panel) {
   });
 }
 
-function setupFilterClearButton(button, container, selectedSet) {
-  if (!button) return;
-  button.addEventListener("click", () => {
-    selectedSet.clear();
-    if (container) {
-      container
-        .querySelectorAll('input[type="checkbox"]')
-        .forEach(input => {
-          input.checked = false;
-        });
-    }
-    applyFarmFilters();
-  });
+function setupFilterButtons(selectAllBtn, deselectAllBtn, container, selectedSet) {
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener("click", () => {
+      if (!container) return;
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(input => {
+        input.checked = true;
+        selectedSet.add(input.value);
+      });
+      applyFarmFilters();
+    });
+  }
+  if (deselectAllBtn) {
+    deselectAllBtn.addEventListener("click", () => {
+      if (!container) return;
+      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(input => {
+        input.checked = false;
+      });
+      selectedSet.clear();
+      applyFarmFilters();
+    });
+  }
 }
 
 function buildFarmPopupHtml(point) {
@@ -1208,14 +1230,15 @@ setupFilterToggle(systemFilterToggleBtn, systemFilterPanel);
 setupFilterToggle(sustainabilityFilterToggleBtn, sustainabilityFilterPanel);
 setupFilterToggle(farmTypeFilterToggleBtn, farmTypeFilterPanel);
 
-setupFilterClearButton(speciesFilterClearBtn, speciesFilterContainer, selectedSpecies);
-setupFilterClearButton(systemFilterClearBtn, systemFilterContainer, selectedSystems);
-setupFilterClearButton(
-  sustainabilityFilterClearBtn,
+setupFilterButtons(speciesFilterSelectAllBtn, speciesFilterDeselectAllBtn, speciesFilterContainer, selectedSpecies);
+setupFilterButtons(systemFilterSelectAllBtn, systemFilterDeselectAllBtn, systemFilterContainer, selectedSystems);
+setupFilterButtons(
+  sustainabilityFilterSelectAllBtn,
+  sustainabilityFilterDeselectAllBtn,
   sustainabilityFilterContainer,
   selectedCriteria
 );
-setupFilterClearButton(farmTypeFilterClearBtn, farmTypeFilterContainer, selectedFarmTypes);
+setupFilterButtons(farmTypeFilterSelectAllBtn, farmTypeFilterDeselectAllBtn, farmTypeFilterContainer, selectedFarmTypes);
 
 updateMetricRanges();
 updateLegend();
