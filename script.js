@@ -1,48 +1,48 @@
 // === Datos originales ===
 const comarcaData = {
-  "Alt Camp": { area: 538, population: 46388, pigs: 62134 },
-  "Alt Empordà": { area: 1358, population: 148732, pigs: 389431 },
-  "Alt Penedès": { area: 593, population: 114189, pigs: 4781 },
-  "Alt Urgell": { area: 1447, population: 21128, pigs: 40486 },
-  "Alta Ribagorça": { area: 427, population: 4040, pigs: 2570 },
-  "Anoia": { area: 866, population: 128432, pigs: 136862 },
-  "Bages": { area: 1092, population: 185352, pigs: 307319 },
-  "Baix Camp": { area: 697, population: 204458, pigs: 64750 },
-  "Baix Ebre": { area: 1003, population: 82399, pigs: 71842 },
-  "Baix Empordà": { area: 702, population: 143443, pigs: 119407 },
-  "Baix Llobregat": { area: 486, population: 848827, pigs: 1007 },
-  "Baix Penedès": { area: 296, population: 118350, pigs: 27868 },
-  "Barcelonès": { area: 146, population: 2354301, pigs: 0 },
-  "Berguedà": { area: 1185, population: 41058, pigs: 253666 },
-  "Cerdanya": { area: 547, population: 20115, pigs: 906 },
-  "Conca de Barberà": { area: 650, population: 20569, pigs: 63803 },
-  "Garraf": { area: 185, population: 161907, pigs: 738 },
-  "Garrigues": { area: 798, population: 19075, pigs: 393347 },
-  "Garrotxa": { area: 735, population: 62449, pigs: 104383 },
-  "Gironès": { area: 576, population: 205573, pigs: 80283 },
-  "Lluçanès": { area: 227, population: 5718, pigs: null },
-  "Maresme": { area: 399, population: 472572, pigs: 6931 },
-  "Moianès": { area: 338, population: 14758, pigs: 83318 },
-  "Montsià": { area: 735, population: 71460, pigs: 178602 },
-  "Noguera": { area: 1784, population: 39727, pigs: 1135009 },
-  "Osona": { area: 1019, population: 164006, pigs: 1027492 },
-  "Pallars Jussà": { area: 1343, population: 13383, pigs: 151237 },
-  "Pallars Sobirà": { area: 1378, population: 7332, pigs: 9584 },
-  "Pla d'Urgell": { area: 305, population: 38111, pigs: 433767 },
-  "Pla de l'Estany": { area: 263, population: 33564, pigs: 202324 },
-  "Priorat": { area: 499, population: 9420, pigs: 7939 },
-  "Ribera d'Ebre": { area: 827, population: 22132, pigs: 47251 },
-  "Ripollès": { area: 957, population: 25826, pigs: 19343 },
-  "Segarra": { area: 563, population: 22667, pigs: 399045 },
-  "Segrià": { area: 1397, population: 217853, pigs: 1347873 },
-  "Selva": { area: 995, population: 185264, pigs: 81658 },
-  "Solsonès": { area: 1161, population: 15323, pigs: 231343 },
-  "Tarragonès": { area: 319, population: 275122, pigs: 8303 },
-  "Terra Alta": { area: 743, population: 11446, pigs: 65664 },
-  "Urgell": { area: 580, population: 38531, pigs: 475287 },
-  "Vall d'Aran": { area: 634, population: 10545, pigs: 45172 },
-  "Vallès Occidental": { area: 583, population: 960033, pigs: 20068 },
-  "Vallès Oriental": { area: 735, population: 426653, pigs: 90003 }
+  "Alt Camp": { totalAnimals: 0 },
+  "Alt Empordà": { totalAnimals: 0 },
+  "Alt Penedès": { totalAnimals: 0 },
+  "Alt Urgell": { totalAnimals: 0 },
+  "Alta Ribagorça": { totalAnimals: 0 },
+  "Anoia": { totalAnimals: 0 },
+  "Bages": { totalAnimals: 0 },
+  "Baix Camp": { totalAnimals: 0 },
+  "Baix Ebre": { totalAnimals: 0 },
+  "Baix Empordà": { totalAnimals: 0 },
+  "Baix Llobregat": { totalAnimals: 0 },
+  "Baix Penedès": { totalAnimals: 0 },
+  "Barcelonès": { totalAnimals: 0 },
+  "Berguedà": { totalAnimals: 0 },
+  "Cerdanya": { totalAnimals: 0 },
+  "Conca de Barberà": { totalAnimals: 0 },
+  "Garraf": { totalAnimals: 0 },
+  "Garrigues": { totalAnimals: 0 },
+  "Garrotxa": { totalAnimals: 0 },
+  "Gironès": { totalAnimals: 0 },
+  "Lluçanès": { totalAnimals: 0 },
+  "Maresme": { totalAnimals: 0 },
+  "Moianès": { totalAnimals: 0 },
+  "Montsià": { totalAnimals: 0 },
+  "Noguera": { totalAnimals: 0 },
+  "Osona": { totalAnimals: 0 },
+  "Pallars Jussà": { totalAnimals: 0 },
+  "Pallars Sobirà": { totalAnimals: 0 },
+  "Pla d'Urgell": { totalAnimals: 0 },
+  "Pla de l'Estany": { totalAnimals: 0 },
+  "Priorat": { totalAnimals: 0 },
+  "Ribera d'Ebre": { totalAnimals: 0 },
+  "Ripollès": { totalAnimals: 0 },
+  "Segarra": { totalAnimals: 0 },
+  "Segrià": { totalAnimals: 0 },
+  "Selva": { totalAnimals: 0 },
+  "Solsonès": { totalAnimals: 0 },
+  "Tarragonès": { totalAnimals: 0 },
+  "Terra Alta": { totalAnimals: 0 },
+  "Urgell": { totalAnimals: 0 },
+  "Vall d'Aran": { totalAnimals: 0 },
+  "Vallès Occidental": { totalAnimals: 0 },
+  "Vallès Oriental": { totalAnimals: 0 }
 };
 
 // Alias de nombres alternativos -> nombre canónico
@@ -88,6 +88,29 @@ for (const [alias, canonical] of Object.entries(comarcaNameAliases)) {
 const metricConfigs = {
   totalAnimals: { label: "Total Animales", shortUnit: "animales", decimals: 0, accessor: d => d.totalAnimals }
 };
+
+function updateMetricRanges() {
+  Object.keys(metricConfigs).forEach(key => {
+    const config = metricConfigs[key];
+    let min = Infinity;
+    let max = 0;
+    let minPositive = Infinity;
+    const { accessor } = config;
+
+    Object.values(comarcaData).forEach(data => {
+      const value = accessor(data);
+      if (value != null && !isNaN(value)) {
+        if (value < min) min = value;
+        if (value > max) max = value;
+        if (value > 0 && value < minPositive) minPositive = value;
+      }
+    });
+
+    config.min = min === Infinity ? 0 : min;
+    config.max = max > 0 ? max : 1;
+    config.minPositive = minPositive === Infinity ? config.max : minPositive;
+  });
+}
 
 let activeMetricKey = "totalAnimals";
 let scaleMode = "log";
@@ -211,28 +234,6 @@ function getComarcaNameFromProps(props = {}) {
   return null;
 }
 
-// Calcular densidades y ratios - REMOVED obsolete metrics calculation
-
-// Calcula rangos por métrica
-for (const key of Object.keys(metricConfigs)) {
-  let min = Infinity;
-  let max = 0;
-  let minPositive = Infinity;
-  const accessor = metricConfigs[key].accessor;
-  for (const data of Object.values(comarcaData)) {
-    const value = accessor(data);
-    if (value != null && !isNaN(value)) {
-      if (value < min) min = value;
-      if (value > max) max = value;
-      if (value > 0 && value < minPositive) minPositive = value;
-    }
-  }
-  const config = metricConfigs[key];
-  config.min = min === Infinity ? 0 : min;
-  config.max = max > 0 ? max : 1;
-  config.minPositive = minPositive === Infinity ? config.max : minPositive;
-}
-
 function getMetricValue(data, metricKey = activeMetricKey) {
   if (!data) return null;
   const config = metricConfigs[metricKey];
@@ -274,6 +275,26 @@ function formatLegendValue(value, decimals = 0) {
   return value.toLocaleString("es-ES", { maximumFractionDigits: decimals });
 }
 
+function buildSpeciesBreakdownRows(farms, totalAnimals) {
+  if (!farms.length || !totalAnimals) return "";
+  const speciesCounts = {};
+  farms.forEach(point => {
+    const species = point.species || "Desconocido";
+    speciesCounts[species] = (speciesCounts[species] || 0) + (point.totalAnimals || 0);
+  });
+
+  return Object.entries(speciesCounts)
+    .filter(([, count]) => count > 0)
+    .map(([species, count]) => {
+      const percentage = totalAnimals > 0 ? (count / totalAnimals) * 100 : 0;
+      return { species, percentage };
+    })
+    .filter(item => item.percentage > 0)
+    .sort((a, b) => b.percentage - a.percentage)
+    .map(item => `<tr><td class="label">${escapeHtml(item.species)}</td><td class="value">${item.percentage.toFixed(2)}%</td></tr>`)
+    .join("");
+}
+
 // Panel
 function updateInfoPanel(name, data) {
   const panel = document.getElementById("info-panel");
@@ -312,6 +333,7 @@ function updateInfoPanel(name, data) {
 
   const farmCount = comarcaFarms.length;
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
+  const speciesRows = buildSpeciesBreakdownRows(comarcaFarms, totalAnimals);
 
   panel.innerHTML = `
     <h2>Total en Cataluña</h2>
@@ -324,24 +346,7 @@ function updateInfoPanel(name, data) {
     <table>
       <tr><td class="label">Explotaciones</td><td class="value">${fmt(farmCount)}</td></tr>
       <tr><td class="label">Total Animales</td><td class="value">${fmt(totalAnimals)}</td></tr>
-      ${(() => {
-      const speciesCounts = {};
-      comarcaFarms.forEach(p => {
-        const s = p.species || "Desconocido";
-        speciesCounts[s] = (speciesCounts[s] || 0) + (p.totalAnimals || 0);
-      });
-
-      return Object.entries(speciesCounts)
-        .filter(([_, count]) => count > 0)
-        .map(([species, count]) => {
-          const percentage = totalAnimals > 0 ? (count / totalAnimals) * 100 : 0;
-          return { species, percentage };
-        })
-        .filter(item => item.percentage > 0)
-        .sort((a, b) => b.percentage - a.percentage)
-        .map(item => `<tr><td class="label">${escapeHtml(item.species)}</td><td class="value">${item.percentage.toFixed(2)}%</td></tr>`)
-        .join("");
-    })()}
+      ${speciesRows}
     </table>
     <div class="hint">Datos basados en Explotaciones RER visibles.</div>
   `;
@@ -388,10 +393,11 @@ const farmTypeFilterContainer = document.getElementById("farmtype-filter");
 const farmTypeFilterPanel = document.getElementById("farmtype-filter-panel");
 const farmTypeFilterToggleBtn = document.getElementById("farmtype-filter-toggle");
 const farmTypeFilterClearBtn = document.getElementById("farmtype-filter-clear");
+const farmsLoadingEl = document.getElementById("farms-loading");
 
 let comarcaLayer = null;
 let farmsLayer = null;
-let farmsVisible = true;
+let farmsVisible = false;
 let farmDataPromise = null;
 let allFarmPoints = [];
 let farmsByComarca = new Map();
@@ -403,9 +409,6 @@ const farmMarkerStyle = {
   radius: 3.2,
   weight: 0.6,
   opacity: 0.9,
-  color: "#7a0000",
-  fillColor: "#ff3b3b",
-  fillOpacity: 0.85,
   pane: farmMarkersPane
 };
 
@@ -544,16 +547,11 @@ function getFilteredFarmPoints() {
 }
 
 function recalculateComarcaMetrics() {
-  // 1. Reset metrics for all comarcas
   for (const key of Object.keys(comarcaData)) {
     comarcaData[key].totalAnimals = 0;
   }
 
-  // 2. Sum totalAnimals for visible farms
   for (const [comarcaName, farms] of farmsByComarca.entries()) {
-    // farmsByComarca keys are normalized, but we need to map back to comarcaData keys if possible
-    // However, comarcaData keys are canonical.
-    // We can use the comarcaNameMap to find the canonical name.
     const canonical = comarcaNameMap[comarcaName];
     if (canonical && comarcaData[canonical]) {
       let sum = 0;
@@ -566,27 +564,7 @@ function recalculateComarcaMetrics() {
     }
   }
 
-  // 3. Recalculate min/max for metricConfigs
-  for (const key of Object.keys(metricConfigs)) {
-    let min = Infinity;
-    let max = 0;
-    let minPositive = Infinity;
-    const accessor = metricConfigs[key].accessor;
-
-    for (const data of Object.values(comarcaData)) {
-      const value = accessor(data);
-      if (value != null && !isNaN(value)) {
-        if (value < min) min = value;
-        if (value > max) max = value;
-        if (value > 0 && value < minPositive) minPositive = value;
-      }
-    }
-
-    const config = metricConfigs[key];
-    config.min = min === Infinity ? 0 : min;
-    config.max = max > 0 ? max : 1;
-    config.minPositive = minPositive === Infinity ? config.max : minPositive;
-  }
+  updateMetricRanges();
 }
 
 function applyFarmFilters() {
@@ -818,6 +796,14 @@ function buildFarmMarkers(points) {
   updateFarmsLayerVisibility();
 }
 
+function setFarmLoadingState(isLoading, message = "Cargando explotaciones…") {
+  if (!farmsLoadingEl) return;
+  farmsLoadingEl.style.display = isLoading ? "block" : "none";
+  if (isLoading && message) {
+    farmsLoadingEl.textContent = message;
+  }
+}
+
 function updateFarmsLayerVisibility() {
   if (!farmsLayer) return;
   const isOnMap = map.hasLayer(farmsLayer);
@@ -835,6 +821,7 @@ function loadFarmLocations() {
   }
 
   if (!farmDataPromise) {
+    setFarmLoadingState(true, "Cargando explotaciones…");
     farmDataPromise = fetch(farmsCsvUrl)
       .then(response => {
         if (!response.ok) {
@@ -953,6 +940,9 @@ function loadFarmLocations() {
         farmsVisible = false;
       }
       alert("No se han podido cargar las explotaciones del CSV.");
+    })
+    .finally(() => {
+      setFarmLoadingState(false);
     });
 }
 
@@ -1117,6 +1107,9 @@ if (farmsToggleInput) {
   });
 }
 
+// Preload farm data so comarca colors and metrics are ready, but keep markers hidden by default.
+loadFarmLocations();
+
 setupFilterToggle(speciesFilterToggleBtn, speciesFilterPanel);
 setupFilterToggle(systemFilterToggleBtn, systemFilterPanel);
 setupFilterToggle(sustainabilityFilterToggleBtn, sustainabilityFilterPanel);
@@ -1131,6 +1124,5 @@ setupFilterClearButton(
 );
 setupFilterClearButton(farmTypeFilterClearBtn, farmTypeFilterContainer, selectedFarmTypes);
 
-loadFarmLocations();
-
+updateMetricRanges();
 updateLegend();
