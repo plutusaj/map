@@ -86,7 +86,8 @@ for (const [alias, canonical] of Object.entries(comarcaNameAliases)) {
 }
 
 const metricConfigs = {
-  totalAnimals: { label: "Total Animales", shortUnit: "animales", decimals: 0, accessor: d => d.totalAnimals }
+  totalAnimals: { label: "Total Animales", shortUnit: "animales", decimals: 0, accessor: d => d.totalAnimals },
+  farmCount: { label: "Explotaciones", shortUnit: "explotaciones", decimals: 0, accessor: d => d.farmCount }
 };
 
 function updateMetricRanges() {
@@ -275,18 +276,19 @@ function formatLegendValue(value, decimals = 0) {
   return value.toLocaleString("es-ES", { maximumFractionDigits: decimals });
 }
 
-function buildSpeciesBreakdownRows(farms, totalAnimals) {
-  if (!farms.length || !totalAnimals) return "";
+function buildSpeciesBreakdownRows(farms, totalValue, metricKey = "totalAnimals") {
+  if (!farms.length || !totalValue) return "";
   const speciesCounts = {};
   farms.forEach(point => {
     const species = point.species || "Desconocido";
-    speciesCounts[species] = (speciesCounts[species] || 0) + (point.totalAnimals || 0);
+    const value = metricKey === "farmCount" ? 1 : (point.totalAnimals || 0);
+    speciesCounts[species] = (speciesCounts[species] || 0) + value;
   });
 
   return Object.entries(speciesCounts)
     .filter(([, count]) => count > 0)
     .map(([species, count]) => {
-      const percentage = totalAnimals > 0 ? (count / totalAnimals) * 100 : 0;
+      const percentage = totalValue > 0 ? (count / totalValue) * 100 : 0;
       return { species, percentage };
     })
     .filter(item => item.percentage > 0)
@@ -333,7 +335,9 @@ function updateInfoPanel(name, data) {
 
   const farmCount = comarcaFarms.length;
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
-  const speciesRows = buildSpeciesBreakdownRows(comarcaFarms, totalAnimals);
+
+  const totalForMetric = activeMetricKey === "farmCount" ? farmCount : totalAnimals;
+  const speciesRows = buildSpeciesBreakdownRows(comarcaFarms, totalForMetric, activeMetricKey);
 
   panel.innerHTML = `
     <h2>Total en Cataluña</h2>
@@ -549,18 +553,22 @@ function getFilteredFarmPoints() {
 function recalculateComarcaMetrics() {
   for (const key of Object.keys(comarcaData)) {
     comarcaData[key].totalAnimals = 0;
+    comarcaData[key].farmCount = 0;
   }
 
   for (const [comarcaName, farms] of farmsByComarca.entries()) {
     const canonical = comarcaNameMap[comarcaName];
     if (canonical && comarcaData[canonical]) {
       let sum = 0;
+      let count = 0;
       for (const farm of farms) {
         if (isFarmVisible(farm)) {
           sum += (farm.totalAnimals || 0);
+          count++;
         }
       }
       comarcaData[canonical].totalAnimals = sum;
+      comarcaData[canonical].farmCount = count;
     }
   }
 
@@ -1061,6 +1069,14 @@ document.querySelectorAll('input[name="metric"]').forEach(input => {
     activeMetricKey = event.target.value;
     updateLegend();
     refreshLayerStyles();
+
+    if (pinnedLayer && pinnedLayer._comarcaMeta) {
+      updateInfoPanel(pinnedLayer._comarcaMeta.name, pinnedLayer._comarcaMeta.data);
+    } else if (hoveredLayer && hoveredLayer._comarcaMeta) {
+      updateInfoPanel(hoveredLayer._comarcaMeta.name, hoveredLayer._comarcaMeta.data);
+    } else {
+      updateInfoPanel(null, null);
+    }
   });
 });
 
