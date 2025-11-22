@@ -281,15 +281,17 @@ function updateInfoPanel(name, data) {
   // Calcular total global basado en filtros actuales
   const filteredPoints = getFilteredFarmPoints();
   const globalTotalAnimals = filteredPoints.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
+  const globalFarmCount = filteredPoints.length;
   const fmt = (v) => (v == null || isNaN(v)) ? "0" : v.toLocaleString("es-ES");
 
   // Si no hay comarca seleccionada/hover
   if (!name) {
     panel.innerHTML = `
-      <div class="global-stats">
-        <span class="label">Total Cataluña Animales:</span>
-        <span class="value">${fmt(globalTotalAnimals)}</span>
-      </div>
+      <h2>Total en Cataluña</h2>
+      <table>
+        <tr><td class="label">Animales</td><td class="value">${fmt(globalTotalAnimals)}</td></tr>
+        <tr><td class="label">Explotaciones</td><td class="value">${fmt(globalFarmCount)}</td></tr>
+      </table>
       <h2>Comarcas de Cataluña</h2>
       <p class="subtitle">Pasa el ratón sobre una comarca.</p>
       <table>
@@ -312,10 +314,11 @@ function updateInfoPanel(name, data) {
   const totalAnimals = comarcaFarms.reduce((sum, p) => sum + (p.totalAnimals || 0), 0);
 
   panel.innerHTML = `
-    <div class="global-stats">
-      <span class="label">Total Cataluña Animales:</span>
-      <span class="value">${fmt(globalTotalAnimals)}</span>
-    </div>
+    <h2>Total en Cataluña</h2>
+    <table>
+      <tr><td class="label">Animales</td><td class="value">${fmt(globalTotalAnimals)}</td></tr>
+      <tr><td class="label">Explotaciones</td><td class="value">${fmt(globalFarmCount)}</td></tr>
+    </table>
     <h2>${escapeHtml(name)}</h2>
     <p class="subtitle">Datos filtrados en mapa</p>
     <table>
@@ -591,6 +594,14 @@ function applyFarmFilters() {
   recalculateComarcaMetrics();
   updateLegend();
   refreshLayerStyles();
+
+  if (pinnedLayer && pinnedLayer._comarcaMeta) {
+    updateInfoPanel(pinnedLayer._comarcaMeta.name, pinnedLayer._comarcaMeta.data);
+  } else if (hoveredLayer && hoveredLayer._comarcaMeta) {
+    updateInfoPanel(hoveredLayer._comarcaMeta.name, hoveredLayer._comarcaMeta.data);
+  } else {
+    updateInfoPanel(null, null);
+  }
 }
 
 function populateFilterOptions(points, {
